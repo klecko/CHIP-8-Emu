@@ -71,7 +71,7 @@ Emulator::Emulator(const char* filename){
 	running     = false;
 	keys.reset();
 	framebuf.reset();
-	init_sdl();
+	init_sdl(basename(filename));
 	srand(time(NULL));
 
 	// Load ROM into memory
@@ -82,15 +82,18 @@ Emulator::~Emulator(){
 	destroy_sdl();
 }
 
-void Emulator::init_sdl(){
-	memset(&sdl, 0, sizeof(sdl));
+void Emulator::init_sdl(const char* game_name){
+	// Create window name
+	char window_name[32];
+	snprintf(window_name, sizeof(window_name), "CHIP-8 Emu: %s", game_name);
 
 	// Init SDL
+	memset(&sdl, 0, sizeof(sdl));
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
 		error_sdl("SDL_Init");
 
 	// Create window
-	sdl.window = SDL_CreateWindow("CHIP-8 Emulator", SDL_WINDOWPOS_UNDEFINED, 
+	sdl.window = SDL_CreateWindow(window_name, SDL_WINDOWPOS_UNDEFINED, 
 	                              SDL_WINDOWPOS_UNDEFINED, FRAMEBUF_W*20, 
 	                              FRAMEBUF_H*20, SDL_WINDOW_SHOWN);
 	if (sdl.window == NULL)
@@ -216,12 +219,13 @@ void Emulator::update_keys(){
 }
 
 uint8_t Emulator::wait_for_key_press(){
-	while (keys.none())
+	while (keys.none() && running)
 		update_keys();
 	for (int i = 0; i < 16; i++)
 		if (keys[i])
 			return i;
-	fprintf(stderr, "NANI\n");
+	
+	// We get here if `running` was cleared. Doesn't matter, we're exiting.
 	return -1;
 }
 

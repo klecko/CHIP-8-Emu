@@ -50,7 +50,7 @@ class Emulator {
 		SDL_Data sdl;
 
 		// Initialize SDL stuff
-		void init_sdl();
+		void init_sdl(const char* game_name);
 
 		// Free SDL stuff
 		void destroy_sdl();

@@ -11,6 +11,6 @@ int main(int argc, char** argv){
 	printf("Loading %s\n", argv[1]);
 
 	Emulator emu(argv[1]);
-	emu.run(3000);
+	emu.run(3000); // This can be changed for faster or slower game
 	printf("DONE\n");
 }
