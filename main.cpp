@@ -2,8 +2,6 @@
 #include <SDL2/SDL.h>
 #include "emulator.h"
 
-using namespace std;
-
 int main(int argc, char** argv){
 	if (argc != 2){
 		fprintf(stderr, "Usage: %s romfile\n", argv[0]);
