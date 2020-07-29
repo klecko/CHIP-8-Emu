@@ -39,6 +39,9 @@ class Emulator {
 		// Pixels state, bit set means displayed
 		std::bitset<FRAMEBUF_W*FRAMEBUF_H> framebuf;
 
+		// 
+		bool should_draw;
+
 		// Is the emulator running? Set when run() is called, cleared when
 		// emulator window is closed.
 		bool running;

@@ -67,6 +67,7 @@ Emulator::Emulator(const char* filename){
 	pc          = 0x200;
 	delay_timer = 0;
 	sound_timer = 0;
+	should_draw = false;
 	running     = false;
 	keys.reset();
 	framebuf.reset();
@@ -175,6 +176,10 @@ void Emulator::update_timers(){
 }
 
 void Emulator::update_screen(){
+	// Update screen only when needed
+	if (!should_draw)
+		return;
+
 	// Get the pixels from the framebuf
 	uint32_t pixels[FRAMEBUF_H*FRAMEBUF_W];
 	for (int i = 0; i < FRAMEBUF_H*FRAMEBUF_W; i++)
@@ -182,9 +187,12 @@ void Emulator::update_screen(){
 	
 	// Draw pixels
 	SDL_UpdateTexture(sdl.texture, NULL, pixels, FRAMEBUF_W*sizeof(uint32_t));
-	SDL_RenderClear(sdl.renderer);
+	//SDL_RenderClear(sdl.renderer);
 	SDL_RenderCopy(sdl.renderer, sdl.texture, NULL, NULL);
 	SDL_RenderPresent(sdl.renderer);
+	
+	// Update flag
+	should_draw = false;
 }
 
 void Emulator::update_keys(){
@@ -398,6 +406,7 @@ void Emulator::run_instruction(){
 			// Dxyn - DRW Vx, Vy, nibble
 			// Display n-byte sprite starting at memory location I at (Vx, Vy),
 			// set VF = collision.
+			should_draw = true;
 			regs[0xF] = display_sprite(I, n, regs[x], regs[y]);
 			pc += 2;
 			break;
