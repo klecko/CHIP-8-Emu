@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <string>
+#include <string.h>
 
 void error(const char* msg){
 	perror(msg);
@@ -38,12 +38,24 @@ int main(int argc, char** argv){
 		error("read");
 	close(fd);
 	
+	// For each call, record the called address
+	bool calls[size/2];
+	memset(calls, 0, sizeof(calls));
+	for (int pc = 0; pc < size; pc += 2){
+		uint16_t inst   = (memory[pc] << 8) | (memory[pc+1]);
+		uint8_t  opcode = (inst & 0xF000) >> 12;
+		uint16_t nnn    = inst & 0x0FFF;
+		if (opcode == 0x2)
+			calls[(nnn-0x200)/2] = true;
+	}
 
+	// Disassemble
+	printf("\nSTART:\n");
 	char disass[32];
 	for (int pc = 0; pc < size; pc += 2){
 		// Fetch instruction and get opcode
-		uint16_t inst = (memory[pc] << 8) | (memory[pc+1]);
-		uint8_t opcode = (inst & 0xF000) >> 12;
+		uint16_t inst   = (memory[pc] << 8) | (memory[pc+1]);
+		uint8_t  opcode = (inst & 0xF000) >> 12;
 
 		// Auxiliary values
 		uint16_t nnn = inst & 0x0FFF;
@@ -68,8 +80,8 @@ int main(int argc, char** argv){
 						break;
 
 					default:
-						fprintf(stderr, "Unknown inst 0: 0x%X\n", inst);
-						exit(EXIT_FAILURE);
+						snprintf(disass, sizeof(disass), "Unknown inst 0: 0x%X", inst);
+						break;
 				}
 				break;
 
@@ -172,8 +184,8 @@ int main(int argc, char** argv){
 						break;
 
 					default:
-						fprintf(stderr, "Unknown inst 8: 0x%X\n", inst);
-						exit(EXIT_FAILURE);
+						snprintf(disass, sizeof(disass), "Unknown inst 8: 0x%X", inst);
+						break;
 				}
 				break;
 
@@ -225,8 +237,8 @@ int main(int argc, char** argv){
 						break;
 
 					default:
-						fprintf(stderr, "Unknown inst E: 0x%X\n", inst);
-						exit(EXIT_FAILURE);
+						snprintf(disass, sizeof(disass), "Unknown inst E: 0x%X", inst);
+						break;
 				}
 				break;
 
@@ -290,18 +302,19 @@ int main(int argc, char** argv){
 						break;
 
 					default:
-						fprintf(stderr, "Unknown inst F: 0x%X\n", inst);
-						exit(EXIT_FAILURE);
-
+						snprintf(disass, sizeof(disass), "Unknown inst F: 0x%X", inst);
+						break;
 				}
 				break;
 
 			default:
-				fprintf(stderr, "Unknown opcode: 0x%X\n", opcode);
-				exit(EXIT_FAILURE);
+				snprintf(disass, sizeof(disass), "Unknown opcode: 0x%X", opcode);
+				break;
 		}
 
-		printf("    %04X:   %-8X %s\n", pc+0x200, inst, disass);
+		if (calls[pc/2])
+			printf("\nFUNCTION 0x%X:\n", pc+0x200);
+		printf("    %04X:     %04X       %s\n", pc+0x200, inst, disass);
 	}
 
 	delete[] memory;
