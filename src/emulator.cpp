@@ -230,7 +230,7 @@ uint8_t Emulator::wait_for_key_press(){
 }
 
 void Emulator::run_instruction(){
-	assert(pc >= 0 && pc < sizeof(memory));
+	assert(pc >= 0 && pc < sizeof(memory)-1);
 	assert(sp >= 0 && sp < sizeof(stack)/sizeof(stack[0]));
 
 	// Get instruction and opcode

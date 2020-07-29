@@ -41,7 +41,7 @@ int main(int argc, char** argv){
 	// For each call, record the called address
 	bool calls[size/2];
 	memset(calls, 0, sizeof(calls));
-	for (int pc = 0; pc < size; pc += 2){
+	for (int pc = 0; pc < size-1; pc += 2){
 		uint16_t inst   = (memory[pc] << 8) | (memory[pc+1]);
 		uint8_t  opcode = (inst & 0xF000) >> 12;
 		uint16_t nnn    = inst & 0x0FFF;
@@ -52,7 +52,7 @@ int main(int argc, char** argv){
 	// Disassemble
 	printf("\nSTART:\n");
 	char disass[32];
-	for (int pc = 0; pc < size; pc += 2){
+	for (int pc = 0; pc < size-1; pc += 2){
 		// Fetch instruction and get opcode
 		uint16_t inst   = (memory[pc] << 8) | (memory[pc+1]);
 		uint8_t  opcode = (inst & 0xF000) >> 12;
