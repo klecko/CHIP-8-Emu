@@ -46,7 +46,10 @@ int main(int argc, char** argv){
 		uint8_t  opcode = (inst & 0xF000) >> 12;
 		uint16_t nnn    = inst & 0x0FFF;
 		if (opcode == 0x2)
-			calls[(nnn-0x200)/2] = true;
+			if (nnn - 0x200 >= size)
+				fprintf(stderr, "ERROR Call out of bounds: Calling %p at %p, max addr is %p\n", nnn, pc+0x200, size+0x200);
+			else
+				calls[(nnn-0x200)/2] = true;
 	}
 
 	// Disassemble
